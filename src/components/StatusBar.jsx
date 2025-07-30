@@ -2,11 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { eventBus, EVENTS } from '../utils/eventBus';
 
 const StatusBar = () => {
-  const [status, setStatus] = useState({ message: 'Ready to record', type: 'info' });
+  const [status, setStatus] = useState({ message: 'Ready', type: 'info' });
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const unsubscribe = eventBus.on(EVENTS.STATUS_UPDATE, (newStatus) => {
       setStatus(newStatus);
+      setIsVisible(true);
+      
+      // Auto-hide after 3 seconds for non-error messages
+      if (newStatus.type !== 'error') {
+        setTimeout(() => setIsVisible(false), 3000);
+      }
     });
 
     return unsubscribe;
@@ -14,15 +21,17 @@ const StatusBar = () => {
 
   const getStatusColor = () => {
     switch (status.type) {
-      case 'success': return 'bg-green-500';
-      case 'error': return 'bg-red-500';
-      case 'warning': return 'bg-yellow-500';
-      default: return 'bg-blue-500';
+      case 'success': return 'text-green-600';
+      case 'error': return 'text-red-600';
+      case 'warning': return 'text-yellow-600';
+      default: return 'text-gray-600';
     }
   };
 
+  if (!isVisible) return null;
+
   return (
-    <div className={`${getStatusColor()} text-white px-4 py-2 rounded-lg text-sm font-medium transition-all`}>
+    <div className={`${getStatusColor()} text-sm font-medium transition-all`}>
       {status.message}
     </div>
   );

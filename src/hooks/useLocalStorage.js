@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { eventBus, EVENTS } from '../utils/eventBus';
 
-const STORAGE_KEY = 'audio-notes';
+const STORAGE_KEY = 'coolnote-notes';
 
 export const useLocalStorage = () => {
   const [notes, setNotes] = useState(() => {
@@ -15,33 +15,25 @@ export const useLocalStorage = () => {
     }
   });
 
-  const saveNote = useCallback(async (audioBlob, transcript, duration) => {
+  const saveNote = useCallback((note) => {
     try {
-      // Convert blob to base64
-      const reader = new FileReader();
-      const base64Promise = new Promise((resolve) => {
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(audioBlob);
-      });
-      
-      const audioData = await base64Promise;
-      
       const newNote = {
-        id: uuidv4(),
-        timestamp: new Date().toISOString(),
-        transcript,
-        duration,
-        audioData,
-        size: audioBlob.size,
+        ...note,
+        id: note.id || uuidv4(),
+        timestamp: note.timestamp || new Date().toISOString(),
+        lastModified: new Date().toISOString(),
       };
 
-      const updatedNotes = [newNote, ...notes];
+      const updatedNotes = [newNote, ...notes.filter(n => n.id !== newNote.id)];
+      // Sort by last modified date
+      updatedNotes.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+      
       setNotes(updatedNotes);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes));
       
       eventBus.emit(EVENTS.NOTE_SAVED, newNote);
       eventBus.emit(EVENTS.STATUS_UPDATE, { 
-        message: 'Note saved successfully', 
+        message: 'Note saved', 
         type: 'success' 
       });
       
@@ -50,6 +42,36 @@ export const useLocalStorage = () => {
       console.error('Error saving note:', error);
       eventBus.emit(EVENTS.ERROR, { 
         message: 'Failed to save note', 
+        error 
+      });
+      throw error;
+    }
+  }, [notes]);
+
+  const updateNote = useCallback((note) => {
+    try {
+      const updatedNote = {
+        ...note,
+        lastModified: new Date().toISOString(),
+      };
+
+      const updatedNotes = notes.map(n => 
+        n.id === note.id ? updatedNote : n
+      );
+      
+      // Sort by last modified date
+      updatedNotes.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+      
+      setNotes(updatedNotes);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes));
+      
+      eventBus.emit(EVENTS.NOTE_SAVED, updatedNote);
+      
+      return updatedNote;
+    } catch (error) {
+      console.error('Error updating note:', error);
+      eventBus.emit(EVENTS.ERROR, { 
+        message: 'Failed to update note', 
         error 
       });
       throw error;
@@ -76,14 +98,10 @@ export const useLocalStorage = () => {
     }
   }, [notes]);
 
-  const getAudioUrl = useCallback((audioData) => {
-    return audioData;
-  }, []);
-
   return {
     notes,
     saveNote,
+    updateNote,
     deleteNote,
-    getAudioUrl,
   };
 };

@@ -1,123 +1,125 @@
-import React, { useState, useCallback } from 'react';
-import { useAudioRecorder } from './hooks/useAudioRecorder';
-import { useSpeechRecognition } from './hooks/useSpeechRecognition';
+import React, { useState } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import AudioVisualizer from './components/AudioVisualizer';
-import RecordingControls from './components/RecordingControls';
-import TranscriptDisplay from './components/TranscriptDisplay';
-import StatusBar from './components/StatusBar';
 import NotesList from './components/NotesList';
+import NoteEditor from './components/NoteEditor';
+import StatusBar from './components/StatusBar';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('record');
+  const [currentView, setCurrentView] = useState('list');
+  const [editingNote, setEditingNote] = useState(null);
   
-  const {
-    isRecording,
-    isPaused,
-    audioBlob,
-    duration,
-    startRecording,
-    stopRecording,
-    pauseRecording,
-    resumeRecording,
-  } = useAudioRecorder();
-
-  const {
-    transcript,
-    interimTranscript,
-    resetTranscript,
-  } = useSpeechRecognition(isRecording && !isPaused);
-
   const {
     notes,
     saveNote,
+    updateNote,
     deleteNote,
-    getAudioUrl,
   } = useLocalStorage();
 
-  const handleStop = useCallback(async () => {
-    stopRecording();
-    
-    if (audioBlob || duration > 0) {
-      // Wait a bit for the final audio blob to be ready
-      setTimeout(async () => {
-        const recorder = useAudioRecorder.getState?.();
-        const finalBlob = recorder?.audioBlob || audioBlob;
-        if (finalBlob) {
-          await saveNote(finalBlob, transcript, duration);
-          resetTranscript();
-        }
-      }, 100);
+  const handleNewNote = () => {
+    const newNote = {
+      id: Date.now().toString(),
+      title: '',
+      content: '',
+      timestamp: new Date().toISOString(),
+      lastModified: new Date().toISOString(),
+    };
+    setEditingNote(newNote);
+    setCurrentView('editor');
+  };
+
+  const handleEditNote = (note) => {
+    setEditingNote(note);
+    setCurrentView('editor');
+  };
+
+  const handleSaveNote = (note) => {
+    if (notes.find(n => n.id === note.id)) {
+      updateNote(note);
+    } else {
+      saveNote(note);
     }
-  }, [stopRecording, audioBlob, transcript, duration, saveNote, resetTranscript]);
+    setCurrentView('list');
+    setEditingNote(null);
+  };
+
+  const handleDeleteNote = (noteId) => {
+    deleteNote(noteId);
+    if (editingNote?.id === noteId) {
+      setCurrentView('list');
+      setEditingNote(null);
+    }
+  };
+
+  const handleBack = () => {
+    setCurrentView('list');
+    setEditingNote(null);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
-            Audio Notes Recorder
-          </h1>
-          <p className="text-gray-400">Record, transcribe, and save your audio notes</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <header className="sticky top-0 bg-white border-b border-gray-200 z-10">
+          <div className="px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              {currentView === 'editor' && (
+                <button
+                  onClick={handleBack}
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  aria-label="Back to notes list"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              )}
+              <h1 className="text-2xl font-semibold text-gray-900">CoolNote</h1>
+            </div>
+            
+            {currentView === 'list' && (
+              <button
+                onClick={handleNewNote}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                New Note
+              </button>
+            )}
+          </div>
         </header>
 
-        <div className="mb-6">
+        {/* Status Bar */}
+        <div className="px-6 py-2 bg-gray-100 border-b border-gray-200">
           <StatusBar />
         </div>
 
-        <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
-          <div className="flex border-b border-gray-700">
-            <button
-              onClick={() => setActiveTab('record')}
-              className={`flex-1 px-6 py-4 font-medium transition-colors ${
-                activeTab === 'record'
-                  ? 'bg-gray-700 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-750'
-              }`}
-            >
-              Record
-            </button>
-            <button
-              onClick={() => setActiveTab('notes')}
-              className={`flex-1 px-6 py-4 font-medium transition-colors ${
-                activeTab === 'notes'
-                  ? 'bg-gray-700 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-750'
-              }`}
-            >
-              My Notes ({notes.length})
-            </button>
-          </div>
-
-          <div className="p-6">
-            {activeTab === 'record' ? (
-              <div className="space-y-6">
-                <AudioVisualizer isActive={isRecording && !isPaused} />
-                
-                <RecordingControls
-                  isRecording={isRecording}
-                  isPaused={isPaused}
-                  onStart={startRecording}
-                  onStop={handleStop}
-                  onPause={pauseRecording}
-                  onResume={resumeRecording}
-                  duration={duration}
-                />
-                
-                <TranscriptDisplay
-                  transcript={transcript}
-                  interimTranscript={interimTranscript}
-                />
-              </div>
-            ) : (
+        {/* Main Content */}
+        <main className="min-h-[calc(100vh-8rem)]">
+          {currentView === 'list' ? (
+            <>
               <NotesList
                 notes={notes}
-                onDelete={deleteNote}
-                getAudioUrl={getAudioUrl}
+                onEdit={handleEditNote}
+                onDelete={handleDeleteNote}
               />
-            )}
-          </div>
-        </div>
+              
+              {/* Welcome message at bottom */}
+              <div className="px-6 py-12 text-center text-gray-500">
+                <p className="text-sm">
+                  Welcome to CoolNote, your private offline AI note-taking app.
+                </p>
+                <p className="text-sm mt-1">
+                  No cloud dependency, everything stays on your device.
+                </p>
+              </div>
+            </>
+          ) : (
+            <NoteEditor
+              note={editingNote}
+              onSave={handleSaveNote}
+              onDelete={() => handleDeleteNote(editingNote.id)}
+            />
+          )}
+        </main>
       </div>
     </div>
   );

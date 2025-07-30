@@ -50,11 +50,7 @@ export const useAudioRecorder = () => {
       };
       
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        setAudioBlob(blob);
-        setAudioUrl(url);
-        eventBus.emit(EVENTS.RECORDING_STOPPED, { blob, url, duration });
+        eventBus.emit(EVENTS.RECORDING_STOPPED, { duration });
       };
       
       mediaRecorder.start(100); // Collect data every 100ms
