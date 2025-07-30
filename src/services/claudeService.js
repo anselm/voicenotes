@@ -8,18 +8,37 @@ export const summarizeWithClaude = async (content, type = 'content') => {
   }
 
   const prompts = {
-    content: `Please summarize the following note concisely, capturing the key points and main ideas:\n\n${content}`,
-    title: `Generate a short, descriptive title (max 6 words) for this note:\n\n${content}`,
-    both: `For the following note, provide:
-1. A short descriptive title (max 6 words)
-2. A concise summary capturing key points
+    content: `You are a Chief of Staff preparing a briefing for a busy executive. Analyze the following notes and provide a structured summary that highlights what matters most.
 
-Note content:
+Create a summary with:
+• KEY POINTS - The most important information and decisions
+• ACTION ITEMS - Clear next steps with owners if mentioned
+• BLOCKERS/CONCERNS - Any risks, issues, or obstacles identified
+• CONTEXT - Brief background if relevant
+
+Use bullet points and be concise but comprehensive. Focus on actionable insights.
+
+Notes to summarize:
+${content}`,
+    title: `Generate a short, descriptive title (max 6 words) for this note:\n\n${content}`,
+    both: `You are a Chief of Staff preparing a briefing for a busy executive. Analyze the following notes and provide:
+
+1. A short descriptive title (max 6 words)
+2. An executive summary with:
+   • KEY POINTS - The most important information and decisions
+   • ACTION ITEMS - Clear next steps with owners if mentioned
+   • BLOCKERS/CONCERNS - Any risks, issues, or obstacles identified
+   • CONTEXT - Brief background if relevant
+
+Use bullet points and be concise but comprehensive. Focus on actionable insights.
+
+Notes to analyze:
 ${content}
 
 Please format your response as:
 Title: [your title here]
-Summary: [your summary here]`
+Summary:
+[your structured summary with bullet points here]`
   };
 
   try {

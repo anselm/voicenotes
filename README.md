@@ -5,12 +5,16 @@ A minimalist note-taking app with AI-powered summarization and voice transcripti
 ## Features
 
 - 🎙️ Voice-to-text transcription
-- 🤖 AI-powered summarization using Claude
+- 🤖 Executive-style AI summarization using Claude
   - Auto-generates titles from content
-  - Creates concise summaries
+  - Creates structured briefings with:
+    - Key points and decisions
+    - Action items with owners
+    - Blockers and concerns
+    - Relevant context
   - Shows compression ratio
 - 💾 Dual storage - browser localStorage + server persistence
-- 🌙 Dark mode interface
+- 🌙 Minimalist black & white interface
 - ⚡ Single process architecture
 - 🔄 Automatic sync between client and server
 

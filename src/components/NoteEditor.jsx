@@ -197,7 +197,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
 
         {showSummary && summary ? (
           <div className="prose prose-invert max-w-none">
-            <p className="text-white whitespace-pre-wrap leading-relaxed">{summary}</p>
+            <div className="text-white whitespace-pre-wrap leading-relaxed font-mono text-sm">{summary}</div>
             <div className="mt-6 text-xs text-gray-600">
               {content.length} → {summary.length} characters ({Math.round((1 - summary.length / content.length) * 100)}% reduction)
             </div>

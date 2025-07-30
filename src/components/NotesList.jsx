@@ -29,7 +29,10 @@ const NotesList = ({ notes, onEdit, onDelete }) => {
   const getPreview = (note) => {
     // Show summary if available, otherwise show content preview
     if (note.summary) {
-      const summaryPreview = note.summary.trim();
+      // Extract first meaningful line from structured summary
+      const lines = note.summary.trim().split('\n');
+      const firstBullet = lines.find(line => line.trim().startsWith('•')) || lines[0];
+      const summaryPreview = firstBullet.trim();
       return summaryPreview.length > 150 ? summaryPreview.substring(0, 150) + '...' : summaryPreview;
     }
     
