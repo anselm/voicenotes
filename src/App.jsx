@@ -112,7 +112,7 @@ function App() {
                   Welcome to MOSS
                 </p>
                 <p className="text-xs mt-1 text-gray-600">
-                  Minimalist Offline Speech & Summarization
+                  Minimalist Offline Speech &amp; Summarization
                 </p>
               </div>
             </>
