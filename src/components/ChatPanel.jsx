@@ -25,6 +25,8 @@ const ChatPanel = ({ isOpen, onClose, noteContent, noteTitle, chatHistory, onCha
   const handleSendMessage = async () => {
     if (!message.trim() || isProcessing) return;
 
+    console.log('Sending message:', message);
+
     const userMessage = {
       role: 'user',
       content: message,
@@ -42,7 +44,9 @@ const ChatPanel = ({ isOpen, onClose, noteContent, noteTitle, chatHistory, onCha
         type: 'info' 
       });
 
+      console.log('Calling Claude with:', { noteContent, noteTitle, historyLength: updatedHistory.length });
       const response = await chatWithClaude(noteContent, noteTitle, updatedHistory);
+      console.log('Claude response:', response);
       
       const assistantMessage = {
         role: 'assistant',
@@ -57,6 +61,7 @@ const ChatPanel = ({ isOpen, onClose, noteContent, noteTitle, chatHistory, onCha
         type: 'success' 
       });
     } catch (error) {
+      console.error('Chat error:', error);
       eventBus.emit(EVENTS.STATUS_UPDATE, { 
         message: error.message || 'Failed to get response', 
         type: 'error' 

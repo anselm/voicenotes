@@ -7,25 +7,32 @@ export const chatWithClaude = async (noteContent, noteTitle, chatHistory) => {
     throw new Error('Claude API key not configured. Please add VITE_CLAUDE_API_KEY to your .env file.');
   }
 
-  // Build conversation context
-  const messages = [
-    {
+  // Build conversation context - only include the chat history, not the initial context
+  const messages = [];
+  
+  // Add the initial context as the first message if there's no history
+  if (chatHistory.length === 0) {
+    messages.push({
       role: 'user',
       content: `I have a note titled "${noteTitle || 'Untitled'}" with the following content:\n\n${noteContent}\n\nI'd like to discuss this note with you. Please help me understand, analyze, or expand on any aspect of it.`
-    },
-    {
-      role: 'assistant',
-      content: 'I\'ve read your note. I\'m ready to discuss it with you. What would you like to explore about this content?'
-    }
-  ];
-
-  // Add chat history
-  chatHistory.forEach(msg => {
-    messages.push({
-      role: msg.role,
-      content: msg.content
     });
-  });
+  } else {
+    // Include context in first message
+    messages.push({
+      role: 'user',
+      content: `Context: I have a note titled "${noteTitle || 'Untitled'}" with the following content:\n\n${noteContent}\n\n${chatHistory[0].content}`
+    });
+    
+    // Add rest of chat history
+    chatHistory.slice(1).forEach(msg => {
+      messages.push({
+        role: msg.role,
+        content: msg.content
+      });
+    });
+  }
+
+  console.log('Sending to Claude:', { messages, model: 'claude-3-haiku-20240307' });
 
   try {
     const response = await fetch(CLAUDE_API_URL, {
@@ -42,12 +49,16 @@ export const chatWithClaude = async (noteContent, noteTitle, chatHistory) => {
       })
     });
 
+    console.log('Claude response status:', response.status);
+
     if (!response.ok) {
       const error = await response.json();
+      console.error('Claude API error response:', error);
       throw new Error(error.error?.message || 'Failed to get response from Claude');
     }
 
     const data = await response.json();
+    console.log('Claude response data:', data);
     return data.content[0].text;
   } catch (error) {
     console.error('Claude API error:', error);

@@ -90,11 +90,18 @@ app.delete('/api/notes/:id', async (req, res) => {
 app.post('/api/anthropic/v1/messages', async (req, res) => {
   const apiKey = req.headers['x-api-key-proxy'] || process.env.CLAUDE_API_KEY || process.env.VITE_CLAUDE_API_KEY;
   
-  if (!apiKey) {
+  console.log('Claude proxy request:', {
+    hasApiKey: !!apiKey,
+    apiKeySource: req.headers['x-api-key-proxy'] ? 'header' : 'env',
+    bodyKeys: Object.keys(req.body)
+  });
+  
+  if (!apiKey || apiKey === 'your-api-key-here') {
     return res.status(401).json({ error: 'API key not configured' });
   }
 
   try {
+    console.log('Proxying to Claude API...');
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -105,11 +112,17 @@ app.post('/api/anthropic/v1/messages', async (req, res) => {
       body: JSON.stringify(req.body)
     });
 
+    console.log('Claude API response status:', response.status);
     const data = await response.json();
+    
+    if (!response.ok) {
+      console.error('Claude API error:', data);
+    }
+    
     res.status(response.status).json(data);
   } catch (error) {
-    console.error('Claude API error:', error);
-    res.status(500).json({ error: 'Failed to connect to Claude API' });
+    console.error('Claude API proxy error:', error);
+    res.status(500).json({ error: 'Failed to connect to Claude API', details: error.message });
   }
 });
 
