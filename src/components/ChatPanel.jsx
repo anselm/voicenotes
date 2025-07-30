@@ -66,7 +66,7 @@ const ChatPanel = ({ isOpen, onClose, noteContent, noteTitle, chatHistory, onCha
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -145,18 +145,19 @@ const ChatPanel = ({ isOpen, onClose, noteContent, noteTitle, chatHistory, onCha
 
         {/* Input */}
         <div className="p-4 border-t border-gray-800">
-          <div className="flex space-x-2">
+          <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex space-x-2">
             <textarea
               ref={inputRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="Ask about this note..."
               className="flex-1 bg-black text-white placeholder-gray-600 border border-gray-700 rounded-lg p-2 resize-none focus:outline-none focus:border-white transition-colors"
               rows="2"
               disabled={isProcessing}
             />
             <button
+              type="button"
               onClick={handleSendMessage}
               disabled={!message.trim() || isProcessing}
               className={`px-4 py-2 border transition-all ${
@@ -167,7 +168,7 @@ const ChatPanel = ({ isOpen, onClose, noteContent, noteTitle, chatHistory, onCha
             >
               Send
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </div>

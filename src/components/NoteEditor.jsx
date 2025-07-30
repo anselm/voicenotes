@@ -280,24 +280,18 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
           </button>
         </div>
         
-        {/* Right side - character count and summarize button */}
-        <div className="flex items-center space-x-4">
-          <div className="text-sm text-gray-400">
-            {content.length} characters
-          </div>
-          
-          <button
-            onClick={handleDone}
-            disabled={isProcessing || !content.trim()}
-            className={`border border-white px-3 py-1 text-sm font-medium transition-all ${
-              isProcessing || !content.trim()
-                ? 'text-gray-600 border-gray-600 cursor-not-allowed'
-                : 'text-white hover:bg-white hover:text-black'
-            }`}
-          >
-            {isProcessing ? 'Processing...' : 'Summarize'}
-          </button>
-        </div>
+        {/* Right side - summarize button */}
+        <button
+          onClick={handleDone}
+          disabled={isProcessing || !content.trim()}
+          className={`border border-white px-3 py-1 text-sm font-medium transition-all ${
+            isProcessing || !content.trim()
+              ? 'text-gray-600 border-gray-600 cursor-not-allowed'
+              : 'text-white hover:bg-white hover:text-black'
+          }`}
+        >
+          {isProcessing ? 'Processing...' : 'Summarize'}
+        </button>
       </div>
       </div>
       
