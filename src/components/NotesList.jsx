@@ -26,8 +26,14 @@ const NotesList = ({ notes, onEdit, onDelete }) => {
     }
   };
 
-  const getPreview = (content) => {
-    const preview = content.trim().split('\n')[0] || 'Empty note';
+  const getPreview = (note) => {
+    // Show summary if available, otherwise show content preview
+    if (note.summary) {
+      const summaryPreview = note.summary.trim();
+      return summaryPreview.length > 150 ? summaryPreview.substring(0, 150) + '...' : summaryPreview;
+    }
+    
+    const preview = note.content.trim().split('\n')[0] || 'Empty note';
     return preview.length > 100 ? preview.substring(0, 100) + '...' : preview;
   };
 
@@ -58,9 +64,16 @@ const NotesList = ({ notes, onEdit, onDelete }) => {
               <h3 className="text-lg font-medium text-gray-900 truncate">
                 {note.title || 'Untitled'}
               </h3>
-              <p className="text-gray-600 mt-1 line-clamp-2">
-                {getPreview(note.content)}
-              </p>
+              <div className="mt-1">
+                {note.summary && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mb-1">
+                    AI Summary
+                  </span>
+                )}
+                <p className="text-gray-600 line-clamp-2">
+                  {getPreview(note)}
+                </p>
+              </div>
               <p className="text-sm text-gray-500 mt-2">
                 {formatDate(note.lastModified || note.timestamp)}
               </p>

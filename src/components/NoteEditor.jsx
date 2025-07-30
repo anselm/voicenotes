@@ -1,11 +1,17 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+import { summarizeWithClaude } from '../services/claudeService';
+import { eventBus, EVENTS } from '../utils/eventBus';
 import AudioRecordButton from './AudioRecordButton';
 
 const NoteEditor = ({ note, onSave, onDelete }) => {
   const [title, setTitle] = useState(note?.title || '');
   const [content, setContent] = useState(note?.content || '');
+  const [summary, setSummary] = useState(note?.summary || '');
+  const [showSummary, setShowSummary] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const contentRef = useRef(null);
   const [cursorPosition, setCursorPosition] = useState(0);
   
@@ -25,6 +31,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
   const handleContentChange = (e) => {
     setContent(e.target.value);
     setCursorPosition(e.target.selectionStart);
+    setHasChanges(true);
   };
 
   // Insert transcribed text at cursor position
@@ -39,14 +46,51 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
     }
   }, [transcript, isRecording]);
 
-  const handleSave = () => {
+  const handleSave = (includesSummary = false) => {
     const updatedNote = {
       ...note,
       title: title.trim() || 'Untitled',
       content,
+      summary: includesSummary ? summary : note?.summary || '',
       lastModified: new Date().toISOString(),
     };
     onSave(updatedNote);
+    setHasChanges(false);
+  };
+
+  const handleDone = async () => {
+    if (!content.trim()) {
+      eventBus.emit(EVENTS.STATUS_UPDATE, { 
+        message: 'Cannot summarize empty note', 
+        type: 'warning' 
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      eventBus.emit(EVENTS.STATUS_UPDATE, { 
+        message: 'Summarizing with Claude...', 
+        type: 'info' 
+      });
+      
+      const summaryText = await summarizeWithClaude(content);
+      setSummary(summaryText);
+      setShowSummary(true);
+      handleSave(true);
+      
+      eventBus.emit(EVENTS.STATUS_UPDATE, { 
+        message: 'Note summarized successfully', 
+        type: 'success' 
+      });
+    } catch (error) {
+      eventBus.emit(EVENTS.STATUS_UPDATE, { 
+        message: error.message || 'Failed to summarize note', 
+        type: 'error' 
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleRecordToggle = () => {
@@ -64,13 +108,20 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
   // Auto-save on content change (debounced)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (title || content) {
+      if ((title || content) && hasChanges) {
         handleSave();
       }
     }, 1000);
 
     return () => clearTimeout(timeoutId);
-  }, [title, content]);
+  }, [title, content, hasChanges]);
+
+  // Load existing summary when note changes
+  useEffect(() => {
+    if (note?.summary) {
+      setSummary(note.summary);
+    }
+  }, [note]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
@@ -84,15 +135,50 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
         />
       </div>
       
-      <div className="flex-1 px-6 py-4 relative">
-        <textarea
-          ref={contentRef}
-          value={content}
-          onChange={handleContentChange}
-          placeholder="Start typing..."
-          className="w-full h-full text-gray-800 placeholder-gray-400 border-none outline-none resize-none bg-transparent"
-          style={{ minHeight: '300px' }}
-        />
+      <div className="flex-1 px-6 py-4 relative overflow-y-auto">
+        {/* Toggle buttons for raw/summary view */}
+        {summary && (
+          <div className="flex space-x-2 mb-4">
+            <button
+              onClick={() => setShowSummary(false)}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                !showSummary 
+                  ? 'bg-gray-200 text-gray-900' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Raw Input
+            </button>
+            <button
+              onClick={() => setShowSummary(true)}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                showSummary 
+                  ? 'bg-gray-200 text-gray-900' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              AI Summary
+            </button>
+          </div>
+        )}
+
+        {showSummary && summary ? (
+          <div className="prose prose-gray max-w-none">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-blue-900 mb-2">AI Summary</h3>
+              <p className="text-gray-800 whitespace-pre-wrap">{summary}</p>
+            </div>
+          </div>
+        ) : (
+          <textarea
+            ref={contentRef}
+            value={content}
+            onChange={handleContentChange}
+            placeholder="Start typing or use the microphone to record..."
+            className="w-full h-full text-gray-800 placeholder-gray-400 border-none outline-none resize-none bg-transparent"
+            style={{ minHeight: '300px' }}
+          />
+        )}
         
         {/* Show interim transcript */}
         {isRecording && interimTranscript && (
@@ -119,8 +205,22 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
           Delete Note
         </button>
         
-        <div className="text-sm text-gray-500">
-          {content.length} characters
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-gray-500">
+            {content.length} characters
+          </div>
+          
+          <button
+            onClick={handleDone}
+            disabled={isProcessing || !content.trim()}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              isProcessing || !content.trim()
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
+          >
+            {isProcessing ? 'Processing...' : 'Done & Summarize'}
+          </button>
         </div>
       </div>
     </div>
