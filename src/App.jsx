@@ -32,14 +32,18 @@ function App() {
     setCurrentView('editor');
   };
 
-  const handleSaveNote = (note) => {
+  const handleSaveNote = (note, options = {}) => {
     if (notes.find(n => n.id === note.id)) {
       updateNote(note);
     } else {
       saveNote(note);
     }
-    setCurrentView('list');
-    setEditingNote(null);
+    
+    // Only navigate back to list if not explicitly prevented
+    if (!options.preventNavigation) {
+      setCurrentView('list');
+      setEditingNote(null);
+    }
   };
 
   const handleDeleteNote = (noteId) => {

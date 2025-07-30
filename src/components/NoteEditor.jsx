@@ -48,7 +48,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
     }
   }, [transcript, isRecording]);
 
-  const handleSave = (includesSummary = false, includeChatHistory = false) => {
+  const handleSave = (includesSummary = false, includeChatHistory = false, options = {}) => {
     const updatedNote = {
       ...note,
       title: title.trim() || 'Untitled',
@@ -57,7 +57,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
       chatHistory: includeChatHistory ? chatHistory : note?.chatHistory || [],
       lastModified: new Date().toISOString(),
     };
-    onSave(updatedNote);
+    onSave(updatedNote, options);
     setHasChanges(false);
   };
 
@@ -95,7 +95,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
         summary: result.summary,
         lastModified: new Date().toISOString(),
       };
-      onSave(updatedNote);
+      onSave(updatedNote, { preventNavigation: true });
       setHasChanges(false);
       
       eventBus.emit(EVENTS.STATUS_UPDATE, { 
@@ -148,7 +148,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
   // Save chat history when it changes
   const handleChatUpdate = (newHistory) => {
     setChatHistory(newHistory);
-    handleSave(false, true);
+    handleSave(false, true, { preventNavigation: true });
   };
 
   return (
