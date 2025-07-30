@@ -1,4 +1,4 @@
-const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
+const CLAUDE_API_URL = '/api/anthropic/v1/messages';
 
 export const summarizeWithClaude = async (content) => {
   const apiKey = import.meta.env.VITE_CLAUDE_API_KEY;
@@ -12,7 +12,7 @@ export const summarizeWithClaude = async (content) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
+        'x-api-key-proxy': apiKey,
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
@@ -36,6 +36,12 @@ export const summarizeWithClaude = async (content) => {
     return data.content[0].text;
   } catch (error) {
     console.error('Claude API error:', error);
+    
+    // Provide helpful error message for CORS issues
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('API connection failed. Make sure you are running the app with "npm run dev" for local development.');
+    }
+    
     throw error;
   }
 };
