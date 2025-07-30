@@ -4,10 +4,10 @@ const AudioRecordButton = ({ isRecording, onToggle }) => {
   return (
     <button
       onClick={onToggle}
-      className={`fixed bottom-8 right-8 rounded-full p-4 transition-all transform hover:scale-105 ${
+      className={`fixed bottom-8 right-8 border border-white p-4 transition-all ${
         isRecording 
-          ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-          : 'bg-blue-600 hover:bg-blue-700'
+          ? 'bg-white text-black animate-pulse' 
+          : 'bg-black text-white hover:bg-white hover:text-black'
       }`}
       aria-label={isRecording ? 'Stop recording' : 'Start recording'}
     >

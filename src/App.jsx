@@ -56,16 +56,16 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className="min-h-screen bg-black text-white">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <header className="sticky top-0 bg-gray-900 z-10">
+        <header className="sticky top-0 bg-black z-10">
           <div className="px-6 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {currentView === 'editor' && (
                 <button
                   onClick={handleBack}
-                  className="text-gray-400 hover:text-gray-100 transition-colors"
+                  className="text-gray-600 hover:text-white transition-colors"
                   aria-label="Back to notes list"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,13 +73,13 @@ function App() {
                   </svg>
                 </button>
               )}
-              <h1 className="text-2xl font-semibold text-gray-100">MOSS</h1>
+              <h1 className="text-lg font-medium text-gray-500">MOSS</h1>
             </div>
             
             {currentView === 'list' && (
               <button
                 onClick={handleNewNote}
-                className="text-blue-500 hover:text-blue-400 font-medium transition-colors"
+                className="border border-white text-white hover:bg-white hover:text-black px-3 py-1 font-medium transition-all"
               >
                 New Note
               </button>

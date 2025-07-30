@@ -147,8 +147,24 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Untitled"
-          className="w-full text-2xl font-semibold text-gray-100 placeholder-gray-500 border-none outline-none bg-transparent"
+          className="w-full text-2xl font-semibold text-white placeholder-gray-600 border-none outline-none bg-transparent"
         />
+        <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
+          <span>{new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}</span>
+          {content && (
+            <>
+              <span>•</span>
+              <span>{content.split(' ').length} words</span>
+              <span>•</span>
+              <span>{Math.ceil(content.split(' ').length / 200)} min read</span>
+            </>
+          )}
+        </div>
       </div>
       
       <div className="flex-1 px-6 py-4 relative overflow-y-auto">
@@ -159,19 +175,19 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
               onClick={() => setShowSummary(false)}
               className={`text-sm font-medium transition-colors ${
                 !showSummary 
-                  ? 'text-gray-100' 
-                  : 'text-gray-500 hover:text-gray-300'
+                  ? 'text-white' 
+                  : 'text-gray-600 hover:text-white'
               }`}
             >
               Raw
             </button>
-            <span className="text-gray-600 mx-2">•</span>
+            <span className="text-gray-700 mx-2">•</span>
             <button
               onClick={() => setShowSummary(true)}
               className={`text-sm font-medium transition-colors ${
                 showSummary 
-                  ? 'text-gray-100' 
-                  : 'text-gray-500 hover:text-gray-300'
+                  ? 'text-white' 
+                  : 'text-gray-600 hover:text-white'
               }`}
             >
               Summary
@@ -181,7 +197,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
 
         {showSummary && summary ? (
           <div className="prose prose-invert max-w-none">
-            <p className="text-gray-200 whitespace-pre-wrap leading-relaxed">{summary}</p>
+            <p className="text-white whitespace-pre-wrap leading-relaxed">{summary}</p>
             <div className="mt-6 text-xs text-gray-600">
               {content.length} → {summary.length} characters ({Math.round((1 - summary.length / content.length) * 100)}% reduction)
             </div>
@@ -192,15 +208,15 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
             value={content}
             onChange={handleContentChange}
             placeholder="Start typing or use the microphone to record..."
-            className="w-full h-full text-gray-100 placeholder-gray-500 border-none outline-none resize-none bg-transparent"
+            className="w-full h-full text-white placeholder-gray-600 border-none outline-none resize-none bg-transparent leading-relaxed"
             style={{ minHeight: '300px' }}
           />
         )}
         
         {/* Show interim transcript */}
         {isRecording && interimTranscript && (
-          <div className="absolute bottom-20 left-6 right-6 bg-gray-800/80 backdrop-blur-sm rounded-lg p-3">
-            <p className="text-sm text-gray-300">
+          <div className="absolute bottom-20 left-6 right-6 bg-black border border-white p-3">
+            <p className="text-sm text-white">
               {interimTranscript}
             </p>
           </div>
@@ -230,10 +246,10 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
           <button
             onClick={handleDone}
             disabled={isProcessing || !content.trim()}
-            className={`text-sm font-medium transition-colors ${
+            className={`border border-white px-3 py-1 text-sm font-medium transition-all ${
               isProcessing || !content.trim()
-                ? 'text-gray-600 cursor-not-allowed'
-                : 'text-green-500 hover:text-green-400'
+                ? 'text-gray-600 border-gray-600 cursor-not-allowed'
+                : 'text-white hover:bg-white hover:text-black'
             }`}
           >
             {isProcessing ? 'Processing...' : 'Summarize'}

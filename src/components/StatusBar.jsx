@@ -21,10 +21,10 @@ const StatusBar = () => {
 
   const getStatusColor = () => {
     switch (status.type) {
-      case 'success': return 'text-green-400';
-      case 'error': return 'text-red-400';
-      case 'warning': return 'text-yellow-400';
-      default: return 'text-gray-400';
+      case 'success': return 'text-white';
+      case 'error': return 'text-white';
+      case 'warning': return 'text-gray-400';
+      default: return 'text-gray-600';
     }
   };
 

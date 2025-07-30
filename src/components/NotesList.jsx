@@ -56,27 +56,35 @@ const NotesList = ({ notes, onEdit, onDelete }) => {
       {notes.map((note) => (
         <div
           key={note.id}
-          className="px-6 py-6 hover:bg-gray-800/50 cursor-pointer transition-all group"
+          className="px-6 py-6 hover:bg-gray-900 cursor-pointer transition-all group"
           onClick={() => onEdit(note)}
         >
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0 pr-4">
-              <h3 className="text-lg font-medium text-gray-100 truncate">
+              <h3 className="text-lg font-medium text-white truncate">
                 {note.title || 'Untitled'}
               </h3>
               <div className="mt-1">
+                <p className="text-gray-400 line-clamp-2 mt-1">
+                  {getPreview(note)}
+                </p>
                 {note.summary && (
-                  <span className="text-xs text-blue-400">
+                  <span className="text-xs text-gray-600">
                     summarized • {Math.round((note.summary.length / note.content.length) * 100)}%
                   </span>
                 )}
-                <p className="text-gray-400 line-clamp-2">
-                  {getPreview(note)}
-                </p>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
-                {formatDate(note.lastModified || note.timestamp)}
-              </p>
+              <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
+                <span>{formatDate(note.lastModified || note.timestamp)}</span>
+                {note.content && (
+                  <>
+                    <span>•</span>
+                    <span>{note.content.split(' ').length} words</span>
+                    <span>•</span>
+                    <span>{Math.ceil(note.content.split(' ').length / 200)} min read</span>
+                  </>
+                )}
+              </div>
             </div>
             
             <button
