@@ -88,13 +88,16 @@ app.delete('/api/notes/:id', async (req, res) => {
 
 // Claude API proxy
 app.post('/api/anthropic/v1/messages', async (req, res) => {
-  const apiKey = req.headers['x-api-key-proxy'] || process.env.CLAUDE_API_KEY;
+  const apiKey = req.headers['x-api-key-proxy'] || process.env.CLAUDE_API_KEY || process.env.VITE_CLAUDE_API_KEY;
   
   if (!apiKey) {
     return res.status(401).json({ error: 'API key not configured' });
   }
 
   try {
+    // Use dynamic import for node-fetch
+    const fetch = (await import('node-fetch')).default;
+    
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
