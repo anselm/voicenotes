@@ -1,3 +1,7 @@
+.env
+data
+package-lock.json
+dist
 .aider*
 .env
 data/
