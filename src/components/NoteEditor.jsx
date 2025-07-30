@@ -79,10 +79,9 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
       
       const result = await summarizeWithClaude(content, 'both');
       
-      // Update title if it's still empty or default
-      if (!title || title === 'Untitled') {
-        setTitle(result.title);
-      }
+      // Always use AI-generated title if current title is empty or default
+      const finalTitle = (!title || title === 'Untitled') ? result.title : title;
+      setTitle(finalTitle);
       
       setSummary(result.summary);
       setShowSummary(true);
@@ -90,7 +89,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
       // Save with both title and summary
       const updatedNote = {
         ...note,
-        title: title || result.title,
+        title: finalTitle,
         content,
         summary: result.summary,
         lastModified: new Date().toISOString(),
@@ -124,13 +123,13 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
     }
   };
 
-  // Auto-save on content change (debounced)
+  // Auto-save on content change (debounced with longer delay)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if ((title || content) && hasChanges) {
-        handleSave();
+        handleSave(false, false, { preventNavigation: true });
       }
-    }, 1000);
+    }, 5000); // Increased to 5 seconds
 
     return () => clearTimeout(timeoutId);
   }, [title, content, hasChanges]);
@@ -175,6 +174,12 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
               <span>{content.split(' ').length} words</span>
               <span>•</span>
               <span>{Math.ceil(content.split(' ').length / 200)} min read</span>
+            </>
+          )}
+          {hasChanges && (
+            <>
+              <span>•</span>
+              <span className="text-yellow-600">Unsaved changes</span>
             </>
           )}
         </div>
@@ -280,18 +285,26 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
           </button>
         </div>
         
-        {/* Right side - summarize button */}
-        <button
-          onClick={handleDone}
-          disabled={isProcessing || !content.trim()}
-          className={`border border-white px-3 py-1 text-sm font-medium transition-all ${
-            isProcessing || !content.trim()
-              ? 'text-gray-600 border-gray-600 cursor-not-allowed'
-              : 'text-white hover:bg-white hover:text-black'
-          }`}
-        >
-          {isProcessing ? 'Processing...' : 'Summarize'}
-        </button>
+        {/* Right side - save and summarize buttons */}
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => handleSave(false, false, { preventNavigation: false })}
+            className="border border-white px-3 py-1 text-sm font-medium transition-all text-white hover:bg-white hover:text-black"
+          >
+            Save
+          </button>
+          <button
+            onClick={handleDone}
+            disabled={isProcessing || !content.trim()}
+            className={`border border-white px-3 py-1 text-sm font-medium transition-all ${
+              isProcessing || !content.trim()
+                ? 'text-gray-600 border-gray-600 cursor-not-allowed'
+                : 'text-white hover:bg-white hover:text-black'
+            }`}
+          >
+            {isProcessing ? 'Processing...' : 'Summarize'}
+          </button>
+        </div>
       </div>
       </div>
       
