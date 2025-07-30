@@ -50,6 +50,7 @@ app.post('/api/notes', async (req, res) => {
       id: req.body.id || Date.now().toString(),
       timestamp: req.body.timestamp || new Date().toISOString(),
       lastModified: new Date().toISOString(),
+      chatHistory: req.body.chatHistory || []
     };
     
     // Update existing note or add new one

@@ -1,5 +1,65 @@
 const CLAUDE_API_URL = '/api/anthropic/v1/messages';
 
+export const chatWithClaude = async (noteContent, noteTitle, chatHistory) => {
+  const apiKey = import.meta.env.VITE_CLAUDE_API_KEY;
+  
+  if (!apiKey || apiKey === 'your-api-key-here') {
+    throw new Error('Claude API key not configured. Please add VITE_CLAUDE_API_KEY to your .env file.');
+  }
+
+  // Build conversation context
+  const messages = [
+    {
+      role: 'user',
+      content: `I have a note titled "${noteTitle || 'Untitled'}" with the following content:\n\n${noteContent}\n\nI'd like to discuss this note with you. Please help me understand, analyze, or expand on any aspect of it.`
+    },
+    {
+      role: 'assistant',
+      content: 'I\'ve read your note. I\'m ready to discuss it with you. What would you like to explore about this content?'
+    }
+  ];
+
+  // Add chat history
+  chatHistory.forEach(msg => {
+    messages.push({
+      role: msg.role,
+      content: msg.content
+    });
+  });
+
+  try {
+    const response = await fetch(CLAUDE_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key-proxy': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 1000,
+        messages: messages
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'Failed to get response from Claude');
+    }
+
+    const data = await response.json();
+    return data.content[0].text;
+  } catch (error) {
+    console.error('Claude API error:', error);
+    
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('API connection failed. Make sure you are running the app with "npm run dev" for local development.');
+    }
+    
+    throw error;
+  }
+};
+
 export const summarizeWithClaude = async (content, type = 'content') => {
   const apiKey = import.meta.env.VITE_CLAUDE_API_KEY;
   

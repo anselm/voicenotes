@@ -4,6 +4,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { summarizeWithClaude } from '../services/claudeService';
 import { eventBus, EVENTS } from '../utils/eventBus';
 import AudioRecordButton from './AudioRecordButton';
+import ChatPanel from './ChatPanel';
 
 const NoteEditor = ({ note, onSave, onDelete }) => {
   const [title, setTitle] = useState(note?.title || '');
@@ -12,6 +13,8 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
   const [showSummary, setShowSummary] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [chatHistory, setChatHistory] = useState(note?.chatHistory || []);
   const contentRef = useRef(null);
   const [cursorPosition, setCursorPosition] = useState(0);
   
@@ -46,12 +49,13 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
     }
   }, [transcript, isRecording]);
 
-  const handleSave = (includesSummary = false) => {
+  const handleSave = (includesSummary = false, includeChatHistory = false) => {
     const updatedNote = {
       ...note,
       title: title.trim() || 'Untitled',
       content,
       summary: includesSummary ? summary : note?.summary || '',
+      chatHistory: includeChatHistory ? chatHistory : note?.chatHistory || [],
       lastModified: new Date().toISOString(),
     };
     onSave(updatedNote);
@@ -132,15 +136,25 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
     return () => clearTimeout(timeoutId);
   }, [title, content, hasChanges]);
 
-  // Load existing summary when note changes
+  // Load existing summary and chat history when note changes
   useEffect(() => {
     if (note?.summary) {
       setSummary(note.summary);
     }
+    if (note?.chatHistory) {
+      setChatHistory(note.chatHistory);
+    }
   }, [note]);
 
+  // Save chat history when it changes
+  const handleChatUpdate = (newHistory) => {
+    setChatHistory(newHistory);
+    handleSave(false, true);
+  };
+
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
+    <div className="flex h-[calc(100vh-8rem)]">
+      <div className={`flex flex-col flex-1 transition-all duration-300 ${showChat ? 'mr-96' : ''}`}>
       <div className="px-6 py-4">
         <input
           type="text"
@@ -191,6 +205,17 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
               }`}
             >
               Summary
+            </button>
+            <span className="text-gray-700 mx-2">•</span>
+            <button
+              onClick={() => setShowChat(!showChat)}
+              className={`text-sm font-medium transition-colors ${
+                showChat 
+                  ? 'text-white' 
+                  : 'text-gray-600 hover:text-white'
+              }`}
+            >
+              Chat
             </button>
           </div>
         )}
@@ -256,6 +281,17 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
           </button>
         </div>
       </div>
+      </div>
+      
+      {/* Chat Panel */}
+      <ChatPanel
+        isOpen={showChat}
+        onClose={() => setShowChat(false)}
+        noteContent={content}
+        noteTitle={title}
+        chatHistory={chatHistory}
+        onChatUpdate={handleChatUpdate}
+      />
     </div>
   );
 };
