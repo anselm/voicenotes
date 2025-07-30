@@ -95,9 +95,6 @@ app.post('/api/anthropic/v1/messages', async (req, res) => {
   }
 
   try {
-    // Use dynamic import for node-fetch
-    const fetch = (await import('node-fetch')).default;
-    
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
