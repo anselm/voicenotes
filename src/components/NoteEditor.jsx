@@ -70,14 +70,30 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
     setIsProcessing(true);
     try {
       eventBus.emit(EVENTS.STATUS_UPDATE, { 
-        message: 'Summarizing with Claude...', 
+        message: 'Generating title and summary with Claude...', 
         type: 'info' 
       });
       
-      const summaryText = await summarizeWithClaude(content);
-      setSummary(summaryText);
+      const result = await summarizeWithClaude(content, 'both');
+      
+      // Update title if it's still empty or default
+      if (!title || title === 'Untitled') {
+        setTitle(result.title);
+      }
+      
+      setSummary(result.summary);
       setShowSummary(true);
-      handleSave(true);
+      
+      // Save with both title and summary
+      const updatedNote = {
+        ...note,
+        title: title || result.title,
+        content,
+        summary: result.summary,
+        lastModified: new Date().toISOString(),
+      };
+      onSave(updatedNote);
+      setHasChanges(false);
       
       eventBus.emit(EVENTS.STATUS_UPDATE, { 
         message: 'Note summarized successfully', 
@@ -167,6 +183,11 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
             <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4">
               <h3 className="text-sm font-semibold text-blue-300 mb-2">AI Summary</h3>
               <p className="text-gray-200 whitespace-pre-wrap">{summary}</p>
+            </div>
+            <div className="mt-4 text-sm text-gray-500">
+              <p>Original length: {content.length} characters</p>
+              <p>Summary length: {summary.length} characters</p>
+              <p>Compression: {Math.round((1 - summary.length / content.length) * 100)}%</p>
             </div>
           </div>
         ) : (

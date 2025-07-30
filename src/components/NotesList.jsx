@@ -66,9 +66,14 @@ const NotesList = ({ notes, onEdit, onDelete }) => {
               </h3>
               <div className="mt-1">
                 {note.summary && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900 text-blue-200 mb-1">
-                    AI Summary
-                  </span>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900 text-blue-200">
+                      AI Summary
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {Math.round((note.summary.length / note.content.length) * 100)}% of original
+                    </span>
+                  </div>
                 )}
                 <p className="text-gray-400 line-clamp-2">
                   {getPreview(note)}

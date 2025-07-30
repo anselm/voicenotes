@@ -6,6 +6,9 @@ A private note-taking app with AI summarization, featuring both local storage an
 
 - 🎙️ Voice-to-text transcription
 - 🤖 AI-powered summarization using Claude
+  - Auto-generates titles from content
+  - Creates concise summaries
+  - Shows compression ratio
 - 💾 Dual storage - browser localStorage + server persistence
 - 🌙 Dark mode interface
 - ⚡ Single process architecture
@@ -28,7 +31,7 @@ A private note-taking app with AI summarization, featuring both local storage an
 
 ## Development
 
-Run both Vite and Express server concurrently:
+For development with hot reload:
 ```bash
 npm run dev
 ```
@@ -41,14 +44,19 @@ This starts:
 
 Build and run the production server:
 ```bash
-npm run serve
+npm run production
 ```
 
-Or separately:
+Or step by step:
 ```bash
+# Build the frontend
 npm run build
-npm start
+
+# Run the server (serves built files)
+NODE_ENV=production npm start
 ```
+
+The server will automatically serve the built files from the `dist` folder if it exists.
 
 The production server:
 - Serves the built React app

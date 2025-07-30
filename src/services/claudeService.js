@@ -1,11 +1,26 @@
 const CLAUDE_API_URL = '/api/anthropic/v1/messages';
 
-export const summarizeWithClaude = async (content) => {
+export const summarizeWithClaude = async (content, type = 'content') => {
   const apiKey = import.meta.env.VITE_CLAUDE_API_KEY;
   
   if (!apiKey || apiKey === 'your-api-key-here') {
     throw new Error('Claude API key not configured. Please add VITE_CLAUDE_API_KEY to your .env file.');
   }
+
+  const prompts = {
+    content: `Please summarize the following note concisely, capturing the key points and main ideas:\n\n${content}`,
+    title: `Generate a short, descriptive title (max 6 words) for this note:\n\n${content}`,
+    both: `For the following note, provide:
+1. A short descriptive title (max 6 words)
+2. A concise summary capturing key points
+
+Note content:
+${content}
+
+Please format your response as:
+Title: [your title here]
+Summary: [your summary here]`
+  };
 
   try {
     const response = await fetch(CLAUDE_API_URL, {
@@ -21,7 +36,7 @@ export const summarizeWithClaude = async (content) => {
         messages: [
           {
             role: 'user',
-            content: `Please summarize the following note concisely, capturing the key points and main ideas:\n\n${content}`
+            content: prompts[type]
           }
         ]
       })
@@ -33,7 +48,20 @@ export const summarizeWithClaude = async (content) => {
     }
 
     const data = await response.json();
-    return data.content[0].text;
+    const responseText = data.content[0].text;
+    
+    if (type === 'both') {
+      // Parse the response to extract title and summary
+      const titleMatch = responseText.match(/Title:\s*(.+)/);
+      const summaryMatch = responseText.match(/Summary:\s*([\s\S]+)/);
+      
+      return {
+        title: titleMatch ? titleMatch[1].trim() : 'Untitled',
+        summary: summaryMatch ? summaryMatch[1].trim() : responseText
+      };
+    }
+    
+    return responseText;
   } catch (error) {
     console.error('Claude API error:', error);
     

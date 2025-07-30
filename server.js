@@ -112,18 +112,30 @@ app.post('/api/anthropic/v1/messages', async (req, res) => {
   }
 });
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
+// Serve static files (always serve built files if they exist)
+try {
+  await fs.access(join(__dirname, 'dist'));
   app.use(express.static(join(__dirname, 'dist')));
   
   app.get('*', (req, res) => {
     res.sendFile(join(__dirname, 'dist', 'index.html'));
   });
+  
+  console.log('Serving built static files from ./dist');
+} catch {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('No dist folder found! Run "npm run build" first.');
+    process.exit(1);
+  } else {
+    console.log('No dist folder found. Run "npm run build" to create production bundle.');
+  }
 }
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('Running in development mode. Run "npm run build" and "NODE_ENV=production npm start" for production.');
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Running in production mode');
+  } else {
+    console.log('Running in development mode');
   }
 });
