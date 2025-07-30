@@ -56,16 +56,16 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900 text-gray-100">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <header className="sticky top-0 bg-white border-b border-gray-200 z-10">
+        <header className="sticky top-0 bg-gray-800 border-b border-gray-700 z-10">
           <div className="px-6 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {currentView === 'editor' && (
                 <button
                   onClick={handleBack}
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  className="text-gray-400 hover:text-gray-100 transition-colors"
                   aria-label="Back to notes list"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,7 +73,7 @@ function App() {
                   </svg>
                 </button>
               )}
-              <h1 className="text-2xl font-semibold text-gray-900">CoolNote</h1>
+              <h1 className="text-2xl font-semibold text-gray-100">CoolNote</h1>
             </div>
             
             {currentView === 'list' && (
@@ -88,7 +88,7 @@ function App() {
         </header>
 
         {/* Status Bar */}
-        <div className="px-6 py-2 bg-gray-100 border-b border-gray-200">
+        <div className="px-6 py-2 bg-gray-800 border-b border-gray-700">
           <StatusBar />
         </div>
 
@@ -103,12 +103,12 @@ function App() {
               />
               
               {/* Welcome message at bottom */}
-              <div className="px-6 py-12 text-center text-gray-500">
+              <div className="px-6 py-12 text-center text-gray-400">
                 <p className="text-sm">
-                  Welcome to CoolNote, your private offline AI note-taking app.
+                  Welcome to CoolNote, your private AI note-taking app.
                 </p>
                 <p className="text-sm mt-1">
-                  No cloud dependency, everything stays on your device.
+                  All notes are saved locally and synced to your server.
                 </p>
               </div>
             </>

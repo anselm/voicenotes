@@ -1,5 +1,6 @@
 .aider*
 .env
+data/
 # Logs
 logs
 *.log

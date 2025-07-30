@@ -1,14 +1,15 @@
 # CoolNote - AI-Powered Note Taking App
 
-A private, offline-first note-taking app with AI summarization capabilities.
+A private note-taking app with AI summarization, featuring both local storage and server persistence.
 
 ## Features
 
 - 🎙️ Voice-to-text transcription
 - 🤖 AI-powered summarization using Claude
-- 💾 Local storage - all data stays on your device
-- 🎨 Clean, minimal interface
-- ⚡ Fast and responsive
+- 💾 Dual storage - browser localStorage + server persistence
+- 🌙 Dark mode interface
+- ⚡ Single process architecture
+- 🔄 Automatic sync between client and server
 
 ## Setup
 
@@ -21,36 +22,53 @@ A private, offline-first note-taking app with AI summarization capabilities.
 3. Create a `.env` file in the root directory:
    ```
    VITE_CLAUDE_API_KEY=your-claude-api-key-here
-   ```
-
-4. Run the development server:
-   ```bash
-   npm run dev
+   CLAUDE_API_KEY=your-claude-api-key-here
+   PORT=3000
    ```
 
 ## Development
 
-The app uses Vite's proxy feature to handle CORS issues with the Claude API during development. The proxy configuration in `vite.config.js` forwards requests to the Anthropic API.
+Run both Vite and Express server concurrently:
+```bash
+npm run dev
+```
 
-## Production Deployment
+This starts:
+- Vite dev server on http://localhost:5173
+- Express API server on http://localhost:3000
 
-For production deployment, you have several options:
+## Production
 
-### Option 1: Vercel (Recommended)
+Build and run the production server:
+```bash
+npm run serve
+```
 
-1. Deploy to Vercel
-2. Add your Claude API key as an environment variable named `CLAUDE_API_KEY`
-3. The `/api/summarize.js` endpoint will automatically work as a serverless function
+Or separately:
+```bash
+npm run build
+npm start
+```
 
-### Option 2: Netlify
+The production server:
+- Serves the built React app
+- Provides API endpoints for notes persistence
+- Proxies Claude API requests
+- Stores notes in `data/notes.json`
 
-1. Create a `netlify/functions/summarize.js` file with the same content as `api/summarize.js`
-2. Deploy to Netlify
-3. Add your Claude API key as an environment variable
+## API Endpoints
 
-### Option 3: Self-hosted with Node.js
+- `GET /api/notes` - Fetch all notes
+- `POST /api/notes` - Create/update a note
+- `DELETE /api/notes/:id` - Delete a note
+- `POST /api/anthropic/v1/messages` - Proxy for Claude API
 
-Create a simple Express server to proxy the API calls.
+## Architecture
+
+- **Frontend**: React + Vite + Tailwind CSS
+- **Backend**: Express.js
+- **Storage**: File-based (JSON) + browser localStorage
+- **AI**: Claude API for summarization
 
 ## Browser Compatibility
 
@@ -58,9 +76,12 @@ Create a simple Express server to proxy the API calls.
 - Firefox: Limited speech recognition support
 - Safari: Speech recognition may require permissions
 
-## Privacy
+## Data Storage
 
-All notes are stored locally in your browser's localStorage. No data is sent to any server except for the AI summarization feature, which only sends the note content to Claude API when you explicitly click "Done & Summarize".
+- Notes are saved in both:
+  - Browser localStorage (instant access)
+  - Server file system at `data/notes.json` (persistence)
+- Automatic fallback to localStorage if server is unavailable
 
 ## License
 

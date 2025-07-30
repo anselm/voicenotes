@@ -1,21 +1,46 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { eventBus, EVENTS } from '../utils/eventBus';
 
 const STORAGE_KEY = 'coolnote-notes';
 
 export const useLocalStorage = () => {
-  const [notes, setNotes] = useState(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch (error) {
-      console.error('Error loading notes from localStorage:', error);
-      return [];
-    }
-  });
+  const [notes, setNotes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const saveNote = useCallback((note) => {
+  // Load notes from server on mount
+  useEffect(() => {
+    loadNotes();
+  }, []);
+
+  const loadNotes = async () => {
+    try {
+      const response = await fetch('/api/notes');
+      if (response.ok) {
+        const serverNotes = await response.json();
+        setNotes(serverNotes);
+        // Also update localStorage as backup
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(serverNotes));
+      } else {
+        // Fallback to localStorage if server fails
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          setNotes(JSON.parse(stored));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading notes:', error);
+      // Fallback to localStorage
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        setNotes(JSON.parse(stored));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveNote = useCallback(async (note) => {
     try {
       const newNote = {
         ...note,
@@ -24,27 +49,49 @@ export const useLocalStorage = () => {
         lastModified: new Date().toISOString(),
       };
 
-      const updatedNotes = [newNote, ...notes.filter(n => n.id !== newNote.id)];
-      // Sort by last modified date
+      // Save to server
+      const response = await fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newNote)
+      });
+
+      if (response.ok) {
+        const savedNote = await response.json();
+        
+        // Update local state
+        const updatedNotes = [savedNote, ...notes.filter(n => n.id !== savedNote.id)];
+        updatedNotes.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+        
+        setNotes(updatedNotes);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes));
+        
+        eventBus.emit(EVENTS.NOTE_SAVED, savedNote);
+        eventBus.emit(EVENTS.STATUS_UPDATE, { 
+          message: 'Note saved', 
+          type: 'success' 
+        });
+        
+        return savedNote;
+      } else {
+        throw new Error('Failed to save note to server');
+      }
+    } catch (error) {
+      console.error('Error saving note:', error);
+      
+      // Fallback to localStorage only
+      const updatedNotes = [note, ...notes.filter(n => n.id !== note.id)];
       updatedNotes.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
       
       setNotes(updatedNotes);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes));
       
-      eventBus.emit(EVENTS.NOTE_SAVED, newNote);
-      eventBus.emit(EVENTS.STATUS_UPDATE, { 
-        message: 'Note saved', 
-        type: 'success' 
-      });
-      
-      return newNote;
-    } catch (error) {
-      console.error('Error saving note:', error);
       eventBus.emit(EVENTS.ERROR, { 
-        message: 'Failed to save note', 
+        message: 'Saved locally only (server unavailable)', 
         error 
       });
-      throw error;
+      
+      return note;
     }
   }, [notes]);
 
@@ -78,21 +125,36 @@ export const useLocalStorage = () => {
     }
   }, [notes]);
 
-  const deleteNote = useCallback((noteId) => {
+  const deleteNote = useCallback(async (noteId) => {
     try {
+      // Delete from server
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        const updatedNotes = notes.filter(note => note.id !== noteId);
+        setNotes(updatedNotes);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes));
+        
+        eventBus.emit(EVENTS.NOTE_DELETED, { id: noteId });
+        eventBus.emit(EVENTS.STATUS_UPDATE, { 
+          message: 'Note deleted', 
+          type: 'info' 
+        });
+      } else {
+        throw new Error('Failed to delete note from server');
+      }
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      
+      // Fallback to local deletion
       const updatedNotes = notes.filter(note => note.id !== noteId);
       setNotes(updatedNotes);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes));
       
-      eventBus.emit(EVENTS.NOTE_DELETED, { id: noteId });
-      eventBus.emit(EVENTS.STATUS_UPDATE, { 
-        message: 'Note deleted', 
-        type: 'info' 
-      });
-    } catch (error) {
-      console.error('Error deleting note:', error);
       eventBus.emit(EVENTS.ERROR, { 
-        message: 'Failed to delete note', 
+        message: 'Deleted locally only (server unavailable)', 
         error 
       });
     }
@@ -103,5 +165,6 @@ export const useLocalStorage = () => {
     saveNote,
     updateNote,
     deleteNote,
+    isLoading,
   };
 };

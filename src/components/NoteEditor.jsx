@@ -125,13 +125,13 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
-      <div className="px-6 py-4 border-b border-gray-200">
+      <div className="px-6 py-4 border-b border-gray-700">
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Untitled"
-          className="w-full text-2xl font-semibold text-gray-900 placeholder-gray-400 border-none outline-none bg-transparent"
+          className="w-full text-2xl font-semibold text-gray-100 placeholder-gray-500 border-none outline-none bg-transparent"
         />
       </div>
       
@@ -143,8 +143,8 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
               onClick={() => setShowSummary(false)}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                 !showSummary 
-                  ? 'bg-gray-200 text-gray-900' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-gray-700 text-gray-100' 
+                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               }`}
             >
               Raw Input
@@ -153,8 +153,8 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
               onClick={() => setShowSummary(true)}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                 showSummary 
-                  ? 'bg-gray-200 text-gray-900' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-gray-700 text-gray-100' 
+                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               }`}
             >
               AI Summary
@@ -163,10 +163,10 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
         )}
 
         {showSummary && summary ? (
-          <div className="prose prose-gray max-w-none">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-blue-900 mb-2">AI Summary</h3>
-              <p className="text-gray-800 whitespace-pre-wrap">{summary}</p>
+          <div className="prose prose-invert max-w-none">
+            <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-blue-300 mb-2">AI Summary</h3>
+              <p className="text-gray-200 whitespace-pre-wrap">{summary}</p>
             </div>
           </div>
         ) : (
@@ -175,15 +175,15 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
             value={content}
             onChange={handleContentChange}
             placeholder="Start typing or use the microphone to record..."
-            className="w-full h-full text-gray-800 placeholder-gray-400 border-none outline-none resize-none bg-transparent"
+            className="w-full h-full text-gray-100 placeholder-gray-500 border-none outline-none resize-none bg-transparent"
             style={{ minHeight: '300px' }}
           />
         )}
         
         {/* Show interim transcript */}
         {isRecording && interimTranscript && (
-          <div className="absolute bottom-20 left-6 right-6 bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-sm text-blue-800">
+          <div className="absolute bottom-20 left-6 right-6 bg-blue-900/20 border border-blue-800 rounded-lg p-3">
+            <p className="text-sm text-blue-300">
               <span className="font-medium">Listening:</span> {interimTranscript}
             </p>
           </div>
@@ -197,16 +197,16 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
       />
       
       {/* Bottom toolbar */}
-      <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+      <div className="px-6 py-3 border-t border-gray-700 flex items-center justify-between">
         <button
           onClick={onDelete}
-          className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors"
+          className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
         >
           Delete Note
         </button>
         
         <div className="flex items-center space-x-4">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-400">
             {content.length} characters
           </div>
           
@@ -215,7 +215,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
             disabled={isProcessing || !content.trim()}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               isProcessing || !content.trim()
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                 : 'bg-green-600 hover:bg-green-700 text-white'
             }`}
           >

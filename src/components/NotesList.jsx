@@ -40,37 +40,37 @@ const NotesList = ({ notes, onEdit, onDelete }) => {
   if (notes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-6">
-        <div className="text-gray-400 mb-6">
+        <div className="text-gray-600 mb-6">
           <svg className="w-24 h-24 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
-        <p className="text-gray-600 text-lg mb-2">No notes yet</p>
+        <p className="text-gray-400 text-lg mb-2">No notes yet</p>
         <p className="text-gray-500 text-sm">Create your first note to get started</p>
       </div>
     );
   }
 
   return (
-    <div className="divide-y divide-gray-200">
+    <div className="divide-y divide-gray-700">
       {notes.map((note) => (
         <div
           key={note.id}
-          className="px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors group"
+          className="px-6 py-4 hover:bg-gray-800 cursor-pointer transition-colors group"
           onClick={() => onEdit(note)}
         >
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0 pr-4">
-              <h3 className="text-lg font-medium text-gray-900 truncate">
+              <h3 className="text-lg font-medium text-gray-100 truncate">
                 {note.title || 'Untitled'}
               </h3>
               <div className="mt-1">
                 {note.summary && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mb-1">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900 text-blue-200 mb-1">
                     AI Summary
                   </span>
                 )}
-                <p className="text-gray-600 line-clamp-2">
+                <p className="text-gray-400 line-clamp-2">
                   {getPreview(note)}
                 </p>
               </div>
@@ -84,7 +84,7 @@ const NotesList = ({ notes, onEdit, onDelete }) => {
                 e.stopPropagation();
                 onDelete(note.id);
               }}
-              className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 transition-all"
+              className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-all"
               aria-label="Delete note"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
