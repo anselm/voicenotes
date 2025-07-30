@@ -145,7 +145,7 @@ const ChatPanel = ({ isOpen, onClose, noteContent, noteTitle, chatHistory, onCha
 
         {/* Input */}
         <div className="p-4 border-t border-gray-800">
-          <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex space-x-2">
+          <div className="flex space-x-2">
             <textarea
               ref={inputRef}
               value={message}
@@ -168,7 +168,7 @@ const ChatPanel = ({ isOpen, onClose, noteContent, noteTitle, chatHistory, onCha
             >
               Send
             </button>
-          </form>
+          </div>
         </div>
       </div>
     </div>
