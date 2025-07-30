@@ -3,7 +3,6 @@ import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { summarizeWithClaude } from '../services/claudeService';
 import { eventBus, EVENTS } from '../utils/eventBus';
-import AudioRecordButton from './AudioRecordButton';
 import ChatPanel from './ChatPanel';
 
 const NoteEditor = ({ note, onSave, onDelete }) => {
@@ -248,14 +247,9 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
         )}
       </div>
       
-      {/* Audio Record Button */}
-      <AudioRecordButton
-        isRecording={isRecording}
-        onToggle={handleRecordToggle}
-      />
-      
       {/* Bottom toolbar */}
-      <div className="px-6 py-3 flex items-center justify-between">
+      <div className="px-6 py-3 flex items-center justify-between relative">
+        {/* Delete button - left */}
         <button
           onClick={onDelete}
           className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
@@ -263,6 +257,30 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
           Delete Note
         </button>
         
+        {/* Microphone button - center */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 bottom-3">
+          <button
+            onClick={handleRecordToggle}
+            className={`border border-white p-3 transition-all ${
+              isRecording 
+                ? 'bg-white text-black animate-pulse' 
+                : 'bg-black text-white hover:bg-white hover:text-black'
+            }`}
+            aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+          >
+            {isRecording ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <rect x="6" y="6" width="8" height="8" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+              </svg>
+            )}
+          </button>
+        </div>
+        
+        {/* Right side - character count and summarize button */}
         <div className="flex items-center space-x-4">
           <div className="text-sm text-gray-400">
             {content.length} characters
