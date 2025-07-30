@@ -59,7 +59,7 @@ function App() {
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <header className="sticky top-0 bg-gray-800 border-b border-gray-700 z-10">
+        <header className="sticky top-0 bg-gray-900 z-10">
           <div className="px-6 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {currentView === 'editor' && (
@@ -73,13 +73,13 @@ function App() {
                   </svg>
                 </button>
               )}
-              <h1 className="text-2xl font-semibold text-gray-100">CoolNote</h1>
+              <h1 className="text-2xl font-semibold text-gray-100">MOSS</h1>
             </div>
             
             {currentView === 'list' && (
               <button
                 onClick={handleNewNote}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="text-blue-500 hover:text-blue-400 font-medium transition-colors"
               >
                 New Note
               </button>
@@ -88,7 +88,7 @@ function App() {
         </header>
 
         {/* Status Bar */}
-        <div className="px-6 py-2 bg-gray-800 border-b border-gray-700">
+        <div className="px-6 py-2">
           <StatusBar />
         </div>
 
@@ -103,12 +103,12 @@ function App() {
               />
               
               {/* Welcome message at bottom */}
-              <div className="px-6 py-12 text-center text-gray-400">
+              <div className="px-6 py-12 text-center text-gray-500">
                 <p className="text-sm">
-                  Welcome to CoolNote, your private AI note-taking app.
+                  Welcome to MOSS
                 </p>
-                <p className="text-sm mt-1">
-                  All notes are saved locally and synced to your server.
+                <p className="text-xs mt-1 text-gray-600">
+                  Minimalist Offline Speech & Summarization
                 </p>
               </div>
             </>

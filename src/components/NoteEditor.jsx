@@ -141,7 +141,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
-      <div className="px-6 py-4 border-b border-gray-700">
+      <div className="px-6 py-4">
         <input
           type="text"
           value={title}
@@ -157,37 +157,33 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
           <div className="flex space-x-2 mb-4">
             <button
               onClick={() => setShowSummary(false)}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+              className={`text-sm font-medium transition-colors ${
                 !showSummary 
-                  ? 'bg-gray-700 text-gray-100' 
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  ? 'text-gray-100' 
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              Raw Input
+              Raw
             </button>
+            <span className="text-gray-600 mx-2">•</span>
             <button
               onClick={() => setShowSummary(true)}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+              className={`text-sm font-medium transition-colors ${
                 showSummary 
-                  ? 'bg-gray-700 text-gray-100' 
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  ? 'text-gray-100' 
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              AI Summary
+              Summary
             </button>
           </div>
         )}
 
         {showSummary && summary ? (
           <div className="prose prose-invert max-w-none">
-            <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-blue-300 mb-2">AI Summary</h3>
-              <p className="text-gray-200 whitespace-pre-wrap">{summary}</p>
-            </div>
-            <div className="mt-4 text-sm text-gray-500">
-              <p>Original length: {content.length} characters</p>
-              <p>Summary length: {summary.length} characters</p>
-              <p>Compression: {Math.round((1 - summary.length / content.length) * 100)}%</p>
+            <p className="text-gray-200 whitespace-pre-wrap leading-relaxed">{summary}</p>
+            <div className="mt-6 text-xs text-gray-600">
+              {content.length} → {summary.length} characters ({Math.round((1 - summary.length / content.length) * 100)}% reduction)
             </div>
           </div>
         ) : (
@@ -203,9 +199,9 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
         
         {/* Show interim transcript */}
         {isRecording && interimTranscript && (
-          <div className="absolute bottom-20 left-6 right-6 bg-blue-900/20 border border-blue-800 rounded-lg p-3">
-            <p className="text-sm text-blue-300">
-              <span className="font-medium">Listening:</span> {interimTranscript}
+          <div className="absolute bottom-20 left-6 right-6 bg-gray-800/80 backdrop-blur-sm rounded-lg p-3">
+            <p className="text-sm text-gray-300">
+              {interimTranscript}
             </p>
           </div>
         )}
@@ -218,7 +214,7 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
       />
       
       {/* Bottom toolbar */}
-      <div className="px-6 py-3 border-t border-gray-700 flex items-center justify-between">
+      <div className="px-6 py-3 flex items-center justify-between">
         <button
           onClick={onDelete}
           className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
@@ -234,13 +230,13 @@ const NoteEditor = ({ note, onSave, onDelete }) => {
           <button
             onClick={handleDone}
             disabled={isProcessing || !content.trim()}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`text-sm font-medium transition-colors ${
               isProcessing || !content.trim()
-                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                : 'bg-green-600 hover:bg-green-700 text-white'
+                ? 'text-gray-600 cursor-not-allowed'
+                : 'text-green-500 hover:text-green-400'
             }`}
           >
-            {isProcessing ? 'Processing...' : 'Done & Summarize'}
+            {isProcessing ? 'Processing...' : 'Summarize'}
           </button>
         </div>
       </div>

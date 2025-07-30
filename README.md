@@ -1,6 +1,6 @@
-# CoolNote - AI-Powered Note Taking App
+# MOSS - Minimalist Offline Speech & Summarization
 
-A private note-taking app with AI summarization, featuring both local storage and server persistence.
+A minimalist note-taking app with AI-powered summarization and voice transcription.
 
 ## Features
 
@@ -25,7 +25,6 @@ A private note-taking app with AI summarization, featuring both local storage an
 3. Create a `.env` file in the root directory:
    ```
    VITE_CLAUDE_API_KEY=your-claude-api-key-here
-   CLAUDE_API_KEY=your-claude-api-key-here
    PORT=3000
    ```
 

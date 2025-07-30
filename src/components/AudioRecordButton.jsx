@@ -4,7 +4,7 @@ const AudioRecordButton = ({ isRecording, onToggle }) => {
   return (
     <button
       onClick={onToggle}
-      className={`fixed bottom-8 right-8 rounded-full p-4 shadow-lg transition-all transform hover:scale-105 ${
+      className={`fixed bottom-8 right-8 rounded-full p-4 transition-all transform hover:scale-105 ${
         isRecording 
           ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
           : 'bg-blue-600 hover:bg-blue-700'

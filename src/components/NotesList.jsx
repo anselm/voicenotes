@@ -52,11 +52,11 @@ const NotesList = ({ notes, onEdit, onDelete }) => {
   }
 
   return (
-    <div className="divide-y divide-gray-700">
+    <div>
       {notes.map((note) => (
         <div
           key={note.id}
-          className="px-6 py-4 hover:bg-gray-800 cursor-pointer transition-colors group"
+          className="px-6 py-6 hover:bg-gray-800/50 cursor-pointer transition-all group"
           onClick={() => onEdit(note)}
         >
           <div className="flex items-start justify-between">
@@ -66,14 +66,9 @@ const NotesList = ({ notes, onEdit, onDelete }) => {
               </h3>
               <div className="mt-1">
                 {note.summary && (
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900 text-blue-200">
-                      AI Summary
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {Math.round((note.summary.length / note.content.length) * 100)}% of original
-                    </span>
-                  </div>
+                  <span className="text-xs text-blue-400">
+                    summarized • {Math.round((note.summary.length / note.content.length) * 100)}%
+                  </span>
                 )}
                 <p className="text-gray-400 line-clamp-2">
                   {getPreview(note)}
